@@ -292,20 +292,20 @@ if not PathFileSystem.IsDirectory("DevPackages") then
 	PathFileSystem.WriteDirectory("DevPackages")
 end
 
-local sourcemapResult = process.spawn("rojo", {"sourcemap", "--output", "sourcemap.json", "place.project.json"})
-if not sourcemapResult.ok then
-	console.warn(`rojo sourcemap failed: {sourcemapResult.stderr} ({sourcemapResult.code})`)
-	process.exit(1)
-end
+-- local sourcemapResult = process.spawn("rojo", {"sourcemap", "--output", "sourcemap.json", "place.project.json"})
+-- if not sourcemapResult.ok then
+-- 	console.warn(`rojo sourcemap failed: {sourcemapResult.stderr} ({sourcemapResult.code})`)
+-- 	process.exit(1)
+-- end
 
-local packageTypesResult = process.spawn("wally-package-types", {"--sourcemap", "sourcemap.json", "Packages/"})
-if not packageTypesResult.ok then
-	console.warn(`wally-package-types failed: {packageTypesResult.stderr} ({packageTypesResult.code})`)
-	process.exit(1)
-end
+-- local packageTypesResult = process.spawn("wally-package-types", {"--sourcemap", "sourcemap.json", "Packages/"})
+-- if not packageTypesResult.ok then
+-- 	console.warn(`wally-package-types failed: {packageTypesResult.stderr} ({packageTypesResult.code})`)
+-- 	process.exit(1)
+-- end
 
-local devPackageTypesResult = process.spawn("wally-package-types", {"--sourcemap", "sourcemap.json", "DevPackages/"})
-if not devPackageTypesResult.ok then
-	console.warn(`wally-package-types failed: {devPackageTypesResult.stderr} ({devPackageTypesResult.code})`)
-	process.exit(1)
-end
+-- local devPackageTypesResult = process.spawn("wally-package-types", {"--sourcemap", "sourcemap.json", "DevPackages/"})
+-- if not devPackageTypesResult.ok then
+-- 	console.warn(`wally-package-types failed: {devPackageTypesResult.stderr} ({devPackageTypesResult.code})`)
+-- 	process.exit(1)
+-- end
