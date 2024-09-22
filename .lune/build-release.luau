@@ -9,6 +9,7 @@ local FileInstance = require("@classes/FileInstance")
 local LuauPolyfill = require("@packages/LuauPolyfill")
 local PathFileSystem = require("@packages/PathFileSystem")
 local PathUtilities = require("@utilities/PathUtilities")
+local WallyPackageTypes = require("@utilities/WallyPackageTypes")
 
 local process = require("@lune/process")
 local serde = require("@lune/serde")
@@ -20,6 +21,7 @@ local SKIP_CONFIRMATION = table.find(process.args, "-s") ~= nil
 	or table.find(process.args, "--skip-confirmation") ~= nil
 
 local INCLUDE_PACKAGES = false
+local USE_BAD_WALLY_PACKAGE_TYPES = false
 
 local PROJECT_NAME = "JanitorUtilities"
 
@@ -98,10 +100,12 @@ local function CreateBuildProject(): Cleanup
 		PathFileSystem.WriteFile(ROJO_PROJECT_PATH, json)
 	end
 
-	local sourcemapResult = process.spawn(
-		"rojo",
-		{"sourcemap", "--output", SOURCEMAP_NAME, if INCLUDE_PACKAGES then ROJO_PROJECT_PATH else "built.project.json"}
-	)
+	local sourcemapResult = process.spawn("rojo", {
+		"sourcemap";
+		"--output";
+		SOURCEMAP_NAME;
+		if INCLUDE_PACKAGES then ROJO_PROJECT_PATH else "built.project.json";
+	})
 	if not sourcemapResult.ok then
 		console.warn(`rojo sourcemap failed: {sourcemapResult.stderr} ({sourcemapResult.code})`)
 		return function()
@@ -113,18 +117,38 @@ local function CreateBuildProject(): Cleanup
 		end
 	end
 
-	local packageTypesResult = process.spawn("wally-package-types", {"--sourcemap", SOURCEMAP_NAME, "Packages/"})
-	if not packageTypesResult.ok then
-		console.warn(`wally-package-types failed: {packageTypesResult.stderr} ({packageTypesResult.code})`)
-		return function()
-			if PathFileSystem.IsFile(ROJO_PROJECT_PATH) then
-				PathFileSystem.RemoveFile(ROJO_PROJECT_PATH)
-			end
-			if PathFileSystem.IsFile(SOURCEMAP_NAME) then
-				PathFileSystem.RemoveFile(SOURCEMAP_NAME)
-			end
+	if USE_BAD_WALLY_PACKAGE_TYPES then
+		local packageTypesResult = process.spawn("wally-package-types", {"--sourcemap", SOURCEMAP_NAME, "Packages/"})
+		if not packageTypesResult.ok then
+			console.warn(`wally-package-types failed: {packageTypesResult.stderr} ({packageTypesResult.code})`)
+			return function()
+				if PathFileSystem.IsFile(ROJO_PROJECT_PATH) then
+					PathFileSystem.RemoveFile(ROJO_PROJECT_PATH)
+				end
+				if PathFileSystem.IsFile(SOURCEMAP_NAME) then
+					PathFileSystem.RemoveFile(SOURCEMAP_NAME)
+				end
 
-			builtProject:Destroy()
+				builtProject:Destroy()
+			end
+		end
+	else
+		local success, value = pcall(function()
+			WallyPackageTypes()
+		end)
+
+		if not success then
+			console.warn(`wally-package-types failed: {value}`)
+			return function()
+				if PathFileSystem.IsFile(ROJO_PROJECT_PATH) then
+					PathFileSystem.RemoveFile(ROJO_PROJECT_PATH)
+				end
+				if PathFileSystem.IsFile(SOURCEMAP_NAME) then
+					PathFileSystem.RemoveFile(SOURCEMAP_NAME)
+				end
+
+				builtProject:Destroy()
+			end
 		end
 	end
 
