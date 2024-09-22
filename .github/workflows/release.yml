@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.ref_name }} --draft --verify-tag --title ${{ github.ref_name }}
+
+  build-luau:
+    needs: ["create-release"]
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rokit
+        uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Build Model Files
+        run: lunar build-release -s
+
+      - name: Upload to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} JanitorUtilities.rbxm JanitorUtilities.rbxmx
+
+      - name: Upload Binary to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: JanitorUtilities.rbxm
+          path: JanitorUtilities.rbxm
+
+      - name: Upload XML to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: JanitorUtilities.rbxmx
+          path: JanitorUtilities.rbxmx
+
+  # publish-npm:
+  #   needs: ["build-luau"]
+  #   name: Publish to NPM
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/checkout@v4

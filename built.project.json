@@ -1,0 +1,7 @@
+{
+	"name": "janitor-utilities-build",
+	"tree": {
+		"$path": "./default.project.json",
+		"Packages": {"$path": "./Packages"}
+	}
+}

@@ -1,0 +1,13 @@
+[package]
+authors = ["HowManySmall <howmanysmall@gmail.com>"]
+exclude = ["**"]
+include = ["src", "src/**", "wally.toml", "wally.lock", "default.project.json", "LICENSE"]
+name = "howmanysmall/janitor-utilities"
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"
+version = "1.0.0"
+
+[dependencies]
+Janitor = "howmanysmall/janitor@^1"
+
+[dev-dependencies]
